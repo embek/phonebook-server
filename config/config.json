@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "adzka",
+    "password": "123456",
+    "database": "phonebook",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "adzka",
+    "password": "123456",
+    "database": "phonebook",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "adzka",
+    "password": "123456",
+    "database": "phonebook",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
