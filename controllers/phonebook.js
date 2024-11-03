@@ -8,7 +8,7 @@ const getContacts = async (query) => {
         query.search = query.search || '';
         query.page = query.page || 1;
         query.sortMode = query.sortMode || 'ASC';
-        const contacts = await models.Contact.findAll(
+        const contacts = await models.Contact.findAndCountAll(
             {
                 where: {
                     name: {
@@ -18,17 +18,11 @@ const getContacts = async (query) => {
             },
             { order: [['name', query.sortMode]] }
         );
-        const total = await models.Contact.findAll({
-            where: {
-                name: {
-                    [Op.like]: `%${query.search}%`
-                }
-            }
-        });
+        const total = contacts.count;
         const pages = Math.ceil(total / query.limit);
         // console.log(contacts);
         const response = {
-            phonebooks: contacts,
+            phonebooks: contacts.rows,
             page: query.page,
             limit: query.limit,
             pages,

@@ -23,7 +23,7 @@ router.post('/phonebooks', async function (req, res, next) {//insert contacts
     }
 });
 
-router.post('/phonebooks/:id', async function (req, res, next) {//edit contacts
+router.put('/phonebooks/:id', async function (req, res, next) {//edit contacts
     try {
         const response = await updateContact(req.body);
         res.status(201).json(response);
@@ -33,7 +33,7 @@ router.post('/phonebooks/:id', async function (req, res, next) {//edit contacts
     }
 });
 
-router.post('/phonebooks/:id/avatar', async function (req, res, next) {//edit avatar
+router.put('/phonebooks/:id/avatar', async function (req, res, next) {//edit avatar
     try {
         const response = await updateContact(req.body);
         res.status(200).json(response);
@@ -44,7 +44,7 @@ router.post('/phonebooks/:id/avatar', async function (req, res, next) {//edit av
 });
 
 
-router.get('/phonebooks/:id', async function (req, res, next) {//delete contacts
+router.delete('/phonebooks/:id', async function (req, res, next) {//delete contacts
     try {
         const response = await deleteContact(req.params.id);
         res.status(200).json(response);
