@@ -10,10 +10,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       phone: {
         type: Sequelize.STRING,
+        allowNull: false,
         validate: {
           isNumeric: true
         }
