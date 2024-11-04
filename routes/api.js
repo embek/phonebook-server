@@ -1,5 +1,5 @@
 var express = require('express');
-const { getContacts, createContact, updateContact, deleteContact } = require('../controllers/phonebook');
+const { getContacts, createContact, updateContact, deleteContact, updateAvatar } = require('../controllers/phonebook');
 var router = express.Router();
 
 /* GET users listing. */
@@ -25,7 +25,7 @@ router.post('/phonebooks', async function (req, res, next) {//insert contacts
 
 router.put('/phonebooks/:id', async function (req, res, next) {//edit contacts
     try {
-        const response = await updateContact(req.body);
+        const response = await updateContact({ ...req.body, id: req.params.id });
         res.status(201).json(response);
     } catch (error) {
         console.log(error);
@@ -35,7 +35,7 @@ router.put('/phonebooks/:id', async function (req, res, next) {//edit contacts
 
 router.put('/phonebooks/:id/avatar', async function (req, res, next) {//edit avatar
     try {
-        const response = await updateContact(req.body);
+        const response = await updateAvatar({ file: req.files, id: req.params.id });
         res.status(200).json(response);
     } catch (error) {
         console.log(error);
