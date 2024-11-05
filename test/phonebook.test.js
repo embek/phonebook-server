@@ -9,28 +9,30 @@ chai.use(chaiHttp);
 const assert = chai.assert;
 
 describe('contacts', () => {
-    let lastId;
-    before(async (done) => {
+    let lastId = 5;
+    before(async () => {
         try {
             const res = await models.Contact.create({
                 name: '#test#abcde',
                 phone: '098623423'
             })
             lastId = res.id;
-            done();
+
         } catch (error) {
             console.log(error.message, 'gagal tambah data dummy');
-            done();
+
         }
     });
 
-    it('/GET contacts success', async (done) => {
+    it('/GET contacts success', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .get('/api/phonebooks');
+            const res = response._body;
+            console.log(res);
             assert.isObject(res);
             assert.equal(res.status, 200)
-            assert.hasAllKeys(res, ['phonebooks', 'page', 'limit', 'total']);
+            assert.hasAllKeys(res, ['phonebooks', 'page', 'limit', 'pages', 'total']);
             assert.isArray(res.phonebooks);
             for (let i = 0; i < res.phonebooks.length; i++) {
                 assert.isObject(res.phonebooks[i]);
@@ -41,17 +43,16 @@ describe('contacts', () => {
                 assert.isNotNull(res.phonebooks[i].createdAt);
                 assert.isNotNull(res.phonebooks[i].updatedAt);
             }
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /GET contacts success');
-            done();
         }
     })
 
-    it('/GET contacts with query success', async (done) => {
+    it('/GET contacts with query success', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .get('/api/phonebooks?search=b&page=2&limit=2');
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 200)
             assert.hasAllKeys(res, ['phonebooks', 'page', 'limit', 'pages', 'total']);
@@ -69,19 +70,17 @@ describe('contacts', () => {
             assert.strictEqual(res.limit, 2);
             assert.isNumber(res.pages);
             assert.isNumber(res.total);
-
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /GET contacts success');
-            done();
         }
     })
 
-    it('/POST contacts success', async (done) => {
+    it('/POST contacts success', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .post('/api/phonebooks')
                 .send({ name: '#test#qwerty', phone: '7623482' });
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 201)
             assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
@@ -91,33 +90,32 @@ describe('contacts', () => {
             assert.strictEqual(res.phone, '7623482');
             assert.isNotNull(res.createdAt);
             assert.isNotNull(res.updatedAt);
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /POST contacts success');
-            done();
+
         }
     })
 
-    it('/POST contacts failed', async (done) => {
+    it('/POST contacts failed', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .post('/api/phonebooks')
                 .send({ name: '#test#poiuyt' });
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 500);
             assert.property(res, 'message');
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /POST contacts failed');
-            done();
         }
     })
 
-    it('/PUT contacts success', async (done) => {
+    it('/PUT contacts success', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .put(`/api/phonebooks/${lastId}`)
                 .send({ name: '#test#pokmnj', phone: '83497' });
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 201)
             assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
@@ -126,35 +124,32 @@ describe('contacts', () => {
             assert.strictEqual(res.phone, '83497');
             assert.isNotNull(res.createdAt);
             assert.isNotNull(res.updatedAt);
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /PUT contacts success');
-            done();
         }
     })
 
-    it('/PUT contacts failed', async (done) => {
+    it('/PUT contacts failed', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .put(`/api/phonebooks/${lastId}`)
                 .send({});
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 500);
             assert.property(res, 'message');
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /PUT contacts failed');
-            done();
-
         }
     })
 
-    it('/PUT avatar success', async (done) => {
+    it('/PUT avatar success', async () => {
         try {
             let dummyAvatar = path.join(__dirname, '..', 'public', 'images', 'dummy-avatar.jpg');
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .put(`/api/phonebooks/${lastId}/avatar`)
                 .attach('avatar', dummyAvatar);
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 201)
             assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
@@ -164,52 +159,30 @@ describe('contacts', () => {
             assert.isNotNull(res.avatar);
             assert.isNotNull(res.createdAt);
             assert.isNotNull(res.updatedAt);
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /PUT avatar success');
-            done();
         }
     })
 
-    it('/PUT avatar failed', async (done) => {
+    it('/PUT avatar failed', async () => {
         try {
             let dummyAvatar = path.join(__dirname, '..', 'public', 'images', 'dummy-avatar.jpg');
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .put(`/api/phonebooks/${lastId}/avatar`);
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 400);
             assert.strictEqual(res.message, 'no images were uploaded');
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /PUT avatar failed');
-            done();
         }
     })
 
-    // it('/DELETE contacts failed', async (done) => {
-    //     try {
-    //         const res = await chai.request(app)
-    //             .delete(`/api/phonebooks/${lastId}`);
-    //         assert.isObject(res);
-    //         assert.equal(res.status, 200)
-    //         assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
-    //         assert.strictEqual(res.id, lastId);
-    //         lastId--;
-    //         assert.isNotNull(res.name);
-    //         assert.isNotNull(res.phone);
-    //         assert.isNotNull(res.createdAt);
-    //         assert.isNotNull(res.updatedAt);
-    //         done();
-    //     } catch (error) {
-    //         console.log(error.message, 'gagal tes /DELETE contacts success');
-    //         done();
-    //     }
-    // })
-
-    it('/DELETE contacts success', async (done) => {
+    it('/DELETE contacts failed', async () => {
         try {
-            const res = await chai.request(app)
+            const response = await chai.request(app)
                 .delete(`/api/phonebooks/${lastId}`);
+            const res = response._body;
             assert.isObject(res);
             assert.equal(res.status, 200)
             assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
@@ -219,14 +192,31 @@ describe('contacts', () => {
             assert.isNotNull(res.phone);
             assert.isNotNull(res.createdAt);
             assert.isNotNull(res.updatedAt);
-            done();
         } catch (error) {
             console.log(error.message, 'gagal tes /DELETE contacts success');
-            done();
         }
     })
 
-    after(async (done) => {
+    it('/DELETE contacts success', async () => {
+        try {
+            const response = await chai.request(app)
+                .delete(`/api/phonebooks/${lastId}`);
+            const res = response._body;
+            assert.isObject(res);
+            assert.equal(res.status, 200)
+            assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
+            assert.strictEqual(res.id, lastId);
+            lastId--;
+            assert.isNotNull(res.name);
+            assert.isNotNull(res.phone);
+            assert.isNotNull(res.createdAt);
+            assert.isNotNull(res.updatedAt);
+        } catch (error) {
+            console.log(error.message, 'gagal tes /DELETE contacts success');
+        }
+    })
+
+    after(async () => {
         try {
             await models.Contact.destroy({
                 where:
@@ -235,10 +225,8 @@ describe('contacts', () => {
                         { [Op.like]: '#test#%' }
                 }
             });
-            done();
         } catch (error) {
             console.log(error.message, 'gagal hapus data dummy');
-            done();
         }
     })
 })
