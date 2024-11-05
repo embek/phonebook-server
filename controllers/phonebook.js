@@ -7,7 +7,8 @@ const getContacts = async (query) => {
     try {
         query.limit = parseInt(query.limit) || 5;
         query.search = query.search || '';
-        query.page = query.page || 1;
+        query.page = parseInt(query.page) || 1;
+        query.sortBy = query.sortBy || 'id';
         query.sortMode = query.sortMode || 'ASC';
         const contacts = await models.Contact.findAndCountAll(
             {
@@ -15,13 +16,21 @@ const getContacts = async (query) => {
                     name: {
                         [Op.like]: `%${query.search}%`
                     }
-                }
-            },
-            { order: [['name', query.sortMode]] }
+                },
+                order: [[query.sortBy, query.sortMode]],
+                limit: query.limit, offset: (query.page - 1) * query.limit
+            }
         );
         const total = contacts.count;
         const pages = Math.ceil(total / query.limit);
-        // console.log(contacts);
+        if (query.page > pages) return {
+            contacts: [],
+            page: query.page,
+            limit: query.limit,
+            pages,
+            total,
+            message: "Requested page is out of range"
+        }
         const response = {
             phonebooks: contacts.rows,
             page: query.page,
@@ -82,11 +91,11 @@ const updateAvatar = async (data) => {//data berisi id dan file avatar
         if (!data.file || Object.keys(data.file).length === 0) throw new Error('no image files were uploaded');
         const oldContact = await getContactById(data.id);
         if (oldContact.avatar != 'default-avatar.png') {
-            unlinkSync(path.join(__dirname, 'public', 'images', oldContact.avatar));
+            unlinkSync(path.join(__dirname, '..', 'public', 'images', oldContact.avatar));
         }
         const newAvatar = data.file.avatar;
         const fileName = JSON.stringify(Date.now()) + newAvatar.name;
-        const uploadPath = path.join(__dirname, 'public', 'images', fileName);
+        const uploadPath = path.join(__dirname,'..', 'public', 'images', fileName);
         await newAvatar.mv(uploadPath);
         const response = await models.Contact.update({ avatar: fileName }, { where: { id: data.id } });
         return response;

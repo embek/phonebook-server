@@ -35,8 +35,11 @@ router.put('/phonebooks/:id', async function (req, res, next) {//edit contacts
 
 router.put('/phonebooks/:id/avatar', async function (req, res, next) {//edit avatar
     try {
-        const response = await updateAvatar({ file: req.files, id: req.params.id });
-        res.status(200).json(response);
+        if (!req.files) res.status(400).json({ message: 'no images were uploaded' })
+        else {
+            const response = await updateAvatar({ file: req.files, id: req.params.id });
+            res.status(200).json(response);
+        }
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: error.message });
