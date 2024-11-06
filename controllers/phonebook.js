@@ -91,7 +91,7 @@ const updateAvatar = async (data) => {//data berisi id dan file avatar
             unlinkSync(path.join(__dirname, '..', 'public', 'images', oldContact.avatar));
         }
         const newAvatar = data.file.avatar;
-        const fileName = JSON.stringify(Date.now()) + newAvatar.name;
+        const fileName = path.parse(newAvatar.name).name + JSON.stringify(Date.now()) + path.extname(newAvatar.name);
         const uploadPath = path.join(__dirname, '..', 'public', 'images', fileName);
         await newAvatar.mv(uploadPath);
         const response = await models.Contact.update({ avatar: fileName }, {

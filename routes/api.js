@@ -38,7 +38,7 @@ router.put('/phonebooks/:id/avatar', async function (req, res, next) {//edit ava
         if (!req.files) res.status(400).json({ message: 'no image files were uploaded' })
         else {
             const response = await updateAvatar({ file: req.files, id: req.params.id });
-            res.status(200).json(response);
+            res.status(201).json(response);
         }
     } catch (error) {
         console.log(error);
