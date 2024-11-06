@@ -40,18 +40,16 @@ const getContacts = async (query) => {
         }
         return response;
     } catch (error) {
-        console.log(error, '\ngagal get contacts');
-        return new Error('gagal get contacts');
+        throw new Error(`${error.message} gagal get contacts`);
     }
 };
 
 const getContactById = async (id) => {
     try {
-        const response = await models.Contact.findOne({ where: { id } });
+        const response = await models.Contact.findByPk(id);
         return response;
     } catch (error) {
-        console.log(error, '\ngagal get contact by id');
-        return new Error('gagal get contact by id');
+        throw new Error(`${error.message} gagal get contact by id`);
     }
 }
 
@@ -65,8 +63,7 @@ const createContact = async (data) => {//data berisi name dan phone
         )
         return response;
     } catch (error) {
-        console.log(error, '\ngagal create contacts');
-        return new Error('gagal create contact');
+        throw new Error(`${error.message} gagal create contact`);
     }
 };
 
@@ -76,13 +73,13 @@ const updateContact = async (data) => {//data berisi id, name dan phone
             name: data.name,
             phone: data.phone
         }, {
-            where: { id: data.id }
-        }
-        )
-        return response;
+            where: { id: data.id },
+            returning: true,
+            plain: true
+        })
+        return response[1].dataValues;
     } catch (error) {
-        console.log(error, '\ngagal update contacts');
-        return new Error('gagal update contacts');
+        throw new Error(`${error.message} gagal update contacts`);
     }
 };
 
@@ -90,28 +87,31 @@ const updateAvatar = async (data) => {//data berisi id dan file avatar
     try {
         if (!data.file || Object.keys(data.file).length === 0) throw new Error('no image files were uploaded');
         const oldContact = await getContactById(data.id);
-        if (oldContact.avatar != 'default-avatar.png') {
+        if (oldContact.avatar) {
             unlinkSync(path.join(__dirname, '..', 'public', 'images', oldContact.avatar));
         }
         const newAvatar = data.file.avatar;
         const fileName = JSON.stringify(Date.now()) + newAvatar.name;
-        const uploadPath = path.join(__dirname,'..', 'public', 'images', fileName);
+        const uploadPath = path.join(__dirname, '..', 'public', 'images', fileName);
         await newAvatar.mv(uploadPath);
-        const response = await models.Contact.update({ avatar: fileName }, { where: { id: data.id } });
-        return response;
+        const response = await models.Contact.update({ avatar: fileName }, {
+            where: { id: data.id },
+            returning: true,
+            plain: true
+        });
+        return response[1].dataValues;
     } catch (error) {
-        console.log(error, '\ngagal update avatar');
-        return new Error('gagal update avatar');
+        throw new Error(`${error.message} gagal update avatar`);
     }
 }
 
 const deleteContact = async (id) => {
     try {
-        const response = await models.Contact.destroy({ where: { id } });
+        const response = await getContactById(id)
+        await models.Contact.destroy({ where: { id } });
         return response;
     } catch (error) {
-        console.log(error, '\ngagal delete contacs');
-        return new Error('gagal delete contacts');
+        throw new Error(`${error.message} gagal delete contacts`);
     }
 };
 
