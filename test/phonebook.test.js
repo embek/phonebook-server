@@ -141,20 +141,20 @@ describe('tes CRUD contacts', () => {
         assert.strictEqual(res.message, 'no image files were uploaded');
     })
 
-    // it('/DELETE contacts failed', async () => {
-    //     const response = await chai.request(app)
-    //         .delete(`/api/phonebooks/${lastId}`);
-    //     const res = response._body;
-    //     assert.isObject(res);
-    //     assert.equal(response.status, 200)
-    //     assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
-    //     assert.strictEqual(res.id, lastId);
-    //     lastId--;
-    //     assert.isNotNull(res.name);
-    //     assert.isNotNull(res.phone);
-    //     assert.isNotNull(res.createdAt);
-    //     assert.isNotNull(res.updatedAt);
-    // })
+    it('/DELETE contacts failed', async () => {
+        const response = await chai.request(app)
+            .delete(`/api/phonebooks/${lastId}`);
+        const res = response._body;
+        assert.isObject(res);
+        assert.equal(response.status, 200)
+        assert.hasAllKeys(res, ['id', 'name', 'phone', 'avatar', 'createdAt', 'updatedAt']);
+        assert.strictEqual(res.id, lastId);
+        lastId--;
+        assert.isNotNull(res.name);
+        assert.isNotNull(res.phone);
+        assert.isNotNull(res.createdAt);
+        assert.isNotNull(res.updatedAt);
+    })
 
     it('/DELETE contacts success', async () => {
         const response = await chai.request(app)

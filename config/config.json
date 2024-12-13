@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "adzka",
-    "password": "123456",
-    "database": "phonebook",
+    "password": "1234",
+    "database": "phonebookdb",
     "host": "127.0.0.1",
     "dialect": "postgres"
   },
