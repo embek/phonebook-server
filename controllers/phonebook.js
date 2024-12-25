@@ -13,9 +13,18 @@ const getContacts = async (query) => {
         const contacts = await models.Contact.findAndCountAll(
             {
                 where: {
-                    name: {
-                        [Op.like]: `%${query.search}%`
-                    }
+                    [Op.or]: [
+                        {
+                            name: {
+                                [Op.iLike]: `%${query.search}%`
+                            }
+                        },
+                        {
+                            phone: {
+                                [Op.iLike]: `%${query.search}%`
+                            }
+                        }
+                    ]
                 },
                 order: [[query.sortBy, query.sortMode]],
                 limit: query.limit, offset: (query.page - 1) * query.limit
