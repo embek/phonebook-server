@@ -5,7 +5,7 @@ const { unlinkSync } = require('node:fs');
 
 const getContacts = async (query) => {
     try {
-        query.limit = parseInt(query.limit) || 5;
+        query.limit = parseInt(query.limit) || 10;
         query.search = query.search || '';
         query.page = parseInt(query.page) || 1;
         query.sortBy = query.sortBy || 'id';
