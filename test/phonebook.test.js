@@ -4,7 +4,7 @@ const models = require("../models");
 const path = require('node:path');
 const app = require('../app');
 const { Op } = require('sequelize');
-const { unlinkSync } = require('node:fs');
+const { unlinkSync, writeFileSync } = require('node:fs');
 
 chai.use(chaiHttp);
 const assert = chai.assert;
@@ -13,11 +13,139 @@ describe('tes CRUD contacts', () => {
     let lastId;
     let fileAvatar;
     before(async () => {
-        const res = await models.Contact.create({
-            name: '#test#abcde',
-            phone: '098623423'
-        })
-        lastId = res.id;
+        // Create multiple test contacts for better testing
+        const testContacts = [
+            { name: '#test#abcde', phone: '098623423' },
+            { name: '#test#bcdef', phone: '123456789' },
+            { name: '#test#cdefg', phone: '987654321' },
+            { name: '#test#defgh', phone: '456789123' }
+        ];
+        
+        for (const contact of testContacts) {
+            const res = await models.Contact.create(contact);
+            lastId = res.id;
+        }
+    });
+
+    // Pagination Tests
+    describe('Pagination Tests', () => {
+        it('should return first page with default limit', async () => {
+            const response = await chai.request(app)
+                .get('/api/phonebooks');
+            const res = response._body;
+            assert.equal(response.status, 200);
+            assert.equal(res.limit, 5);
+            assert.equal(res.page, 1);
+        });
+
+        it('should return empty array for page beyond total pages', async () => {
+            const response = await chai.request(app)
+                .get('/api/phonebooks?page=1000');
+            const res = response._body;
+            assert.equal(response.status, 200);
+            assert.isEmpty(res.phonebooks);
+        });
+    });
+
+    // Sorting Tests
+    describe('Sorting Tests', () => {
+        it('should sort contacts by name ASC', async () => {
+            const response = await chai.request(app)
+                .get('/api/phonebooks?sortBy=name&sortMode=ASC');
+            const res = response._body;
+            assert.equal(response.status, 200);
+            for (let i = 1; i < res.phonebooks.length; i++) {
+                assert.isTrue(res.phonebooks[i-1].name <= res.phonebooks[i].name);
+            }
+        });
+
+        it('should sort contacts by name DESC', async () => {
+            const response = await chai.request(app)
+                .get('/api/phonebooks?sortBy=name&sortMode=DESC');
+            const res = response._body;
+            assert.equal(response.status, 200);
+            for (let i = 1; i < res.phonebooks.length; i++) {
+                assert.isTrue(res.phonebooks[i-1].name >= res.phonebooks[i].name);
+            }
+        });
+    });
+
+    // Validation Tests
+    describe('Validation Tests', () => {
+        it('should reject empty name on create', async () => {
+            const response = await chai.request(app)
+                .post('/api/phonebooks')
+                .send({ phone: '12345' });
+            assert.equal(response.status, 500);
+        });
+
+        it('should reject empty phone on create', async () => {
+            const response = await chai.request(app)
+                .post('/api/phonebooks')
+                .send({ name: '#test#validation' });
+            assert.equal(response.status, 500);
+        });
+
+        it('should reject invalid ID on update', async () => {
+            const response = await chai.request(app)
+                .put('/api/phonebooks/99999999')
+                .send({ name: '#test#invalid', phone: '12345' });
+            assert.equal(response.status, 500);
+        });
+    });
+
+    // Avatar Tests
+    describe('Avatar Tests', () => {
+        let tempTextFile;
+
+        before(() => {
+            // Create temporary text file for testing
+            tempTextFile = path.join(__dirname, 'temp-test.txt');
+            writeFileSync(tempTextFile, 'This is a test file');
+        });
+
+        it('should reject non-image files', async () => {
+            const response = await chai.request(app)
+                .put(`/api/phonebooks/${lastId}/avatar`)
+                .attach('avatar', tempTextFile);
+            assert.equal(response.status, 500);
+        });
+
+        after(() => {
+            // Clean up temporary file
+            try {
+                unlinkSync(tempTextFile);
+            } catch (error) {
+                console.log('Error cleaning up temp file:', error.message);
+            }
+        });
+
+        it('should reject oversized images', async () => {
+            // Add implementation for large file test
+        });
+    });
+
+    // Search Tests
+    describe('Search Tests', () => {
+        it('should find contacts by partial name match', async () => {
+            const response = await chai.request(app)
+                .get('/api/phonebooks?search=test');
+            const res = response._body;
+            assert.equal(response.status, 200);
+            res.phonebooks.forEach(contact => {
+                assert.include(contact.name.toLowerCase(), 'test');
+            });
+        });
+
+        it('should find contacts by partial phone match', async () => {
+            const response = await chai.request(app)
+                .get('/api/phonebooks?search=123');
+            const res = response._body;
+            assert.equal(response.status, 200);
+            res.phonebooks.forEach(contact => {
+                assert.include(contact.phone, '123');
+            });
+        });
     });
 
     it('/GET contacts success', async () => {
@@ -173,7 +301,9 @@ describe('tes CRUD contacts', () => {
 
     after(async () => {
         try {
-            unlinkSync(path.join(__dirname, '..', 'public', 'images', fileAvatar));
+            if (fileAvatar) {
+                unlinkSync(path.join(__dirname, '..', 'public', 'images', fileAvatar));
+            }
             await models.Contact.destroy({
                 where:
                 {

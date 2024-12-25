@@ -33,12 +33,11 @@ const getContacts = async (query) => {
         const total = contacts.count;
         const pages = Math.ceil(total / query.limit);
         if (query.page > pages) return {
-            contacts: [],
+            phonebooks: [],
             page: query.page,
             limit: query.limit,
             pages,
-            total,
-            message: "Requested page is out of range"
+            total
         }
         const response = {
             phonebooks: contacts.rows,
@@ -95,14 +94,23 @@ const updateContact = async (data) => {//data berisi id, name dan phone
 const updateAvatar = async (data) => {//data berisi id dan file avatar
     try {
         if (!data.file || Object.keys(data.file).length === 0) throw new Error('no image files were uploaded');
+        
+        // Add image file validation
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const avatar = data.file.avatar;
+        
+        if (!allowedTypes.includes(avatar.mimetype)) {
+            throw new Error('Only image files (jpeg, png, gif) are allowed');
+        }
+
         const oldContact = await getContactById(data.id);
         if (oldContact.avatar) {
             unlinkSync(path.join(__dirname, '..', 'public', 'images', oldContact.avatar));
         }
-        const newAvatar = data.file.avatar;
-        const fileName = path.parse(newAvatar.name).name + JSON.stringify(Date.now()) + path.extname(newAvatar.name);
+        
+        const fileName = path.parse(avatar.name).name + JSON.stringify(Date.now()) + path.extname(avatar.name);
         const uploadPath = path.join(__dirname, '..', 'public', 'images', fileName);
-        await newAvatar.mv(uploadPath);
+        await avatar.mv(uploadPath);
         const response = await models.Contact.update({ avatar: fileName }, {
             where: { id: data.id },
             returning: true,
