@@ -5,7 +5,7 @@ const { unlinkSync } = require('node:fs');
 
 const getContacts = async (query) => {
     try {
-        query.limit = parseInt(query.limit) || 10;
+        query.limit = parseInt(query.limit) || 5;
         query.search = query.search || '';
         query.page = parseInt(query.page) || 1;
         query.sortBy = query.sortBy || 'id';
@@ -94,11 +94,11 @@ const updateContact = async (data) => {//data berisi id, name dan phone
 const updateAvatar = async (data) => {//data berisi id dan file avatar
     try {
         if (!data.file || Object.keys(data.file).length === 0) throw new Error('no image files were uploaded');
-        
+
         // Add image file validation
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
         const avatar = data.file.avatar;
-        
+
         if (!allowedTypes.includes(avatar.mimetype)) {
             throw new Error('Only image files (jpeg, png, gif) are allowed');
         }
@@ -107,7 +107,7 @@ const updateAvatar = async (data) => {//data berisi id dan file avatar
         if (oldContact.avatar) {
             unlinkSync(path.join(__dirname, '..', 'public', 'images', oldContact.avatar));
         }
-        
+
         const fileName = path.parse(avatar.name).name + JSON.stringify(Date.now()) + path.extname(avatar.name);
         const uploadPath = path.join(__dirname, '..', 'public', 'images', fileName);
         await avatar.mv(uploadPath);
