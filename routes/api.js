@@ -1,11 +1,21 @@
 var express = require('express');
-const { getContacts, createContact, updateContact, deleteContact, updateAvatar } = require('../controllers/phonebook');
+const { getContacts, createContact, updateContact, deleteContact, updateAvatar, getContactById } = require('../controllers/phonebook');
 var router = express.Router();
 
 /* GET users listing. */
 router.get('/phonebooks', async function (req, res, next) {//get contacts
     try {
         const response = await getContacts(req.query);
+        res.status(200).json(response);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get('/phonebooks/:id', async function (req, res, next) {
+    try {
+        const response = await getContactById(req.params.id);
         res.status(200).json(response);
     } catch (error) {
         console.log(error);
