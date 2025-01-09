@@ -125,7 +125,7 @@ const updateAvatar = async (data) => {//data berisi id dan file avatar
 const deleteContact = async (id) => {
     try {
         const response = await getContactById(id);
-        unlinkSync(path.join(__dirname, '..', 'public', 'images', response.avatar));
+        if (response.avatar) unlinkSync(path.join(__dirname, '..', 'public', 'images', response.avatar));
         await models.Contact.destroy({ where: { id } });
         return response;
     } catch (error) {
