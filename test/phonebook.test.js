@@ -20,7 +20,7 @@ describe('tes CRUD contacts', () => {
             { name: '#test#cdefg', phone: '987654321' },
             { name: '#test#defgh', phone: '456789123' }
         ];
-        
+
         for (const contact of testContacts) {
             const res = await models.Contact.create(contact);
             lastId = res.id;
@@ -55,7 +55,7 @@ describe('tes CRUD contacts', () => {
             const res = response._body;
             assert.equal(response.status, 200);
             for (let i = 1; i < res.phonebooks.length; i++) {
-                assert.isTrue(res.phonebooks[i-1].name <= res.phonebooks[i].name);
+                assert.isTrue(res.phonebooks[i - 1].name <= res.phonebooks[i].name);
             }
         });
 
@@ -65,7 +65,7 @@ describe('tes CRUD contacts', () => {
             const res = response._body;
             assert.equal(response.status, 200);
             for (let i = 1; i < res.phonebooks.length; i++) {
-                assert.isTrue(res.phonebooks[i-1].name >= res.phonebooks[i].name);
+                assert.isTrue(res.phonebooks[i - 1].name >= res.phonebooks[i].name);
             }
         });
     });
@@ -254,6 +254,7 @@ describe('tes CRUD contacts', () => {
         assert.isNotNull(res.name);
         assert.isNotNull(res.phone);
         assert.isNotNull(res.avatar);
+        console.log(res.avatar);
         fileAvatar = res.avatar;
         assert.isNotNull(res.createdAt);
         assert.isNotNull(res.updatedAt);

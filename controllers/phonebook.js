@@ -96,7 +96,7 @@ const updateAvatar = async (data) => {//data berisi id dan file avatar
         if (!data.file || Object.keys(data.file).length === 0) throw new Error('no image files were uploaded');
 
         // Add image file validation
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif','image/jpg'];
         const avatar = data.file.avatar;
 
         if (!allowedTypes.includes(avatar.mimetype)) {
